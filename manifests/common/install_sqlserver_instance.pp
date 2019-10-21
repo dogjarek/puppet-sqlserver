@@ -20,6 +20,7 @@ define sqlserver::common::install_sqlserver_instance(
   $installer_path,
   $instance_name  = $title,
   $install_params = {},
+  $user         = undef,
   $quiet_params = '/QUIET /IACCEPTSQLSERVERLICENSETERMS'
   ) {
 
@@ -61,11 +62,22 @@ define sqlserver::common::install_sqlserver_instance(
 
   $parameters = convert_to_parameter_string($params)
 
-  exec { "Install SQL Server instance: ${instance_name}":
-    command => "\"${installer_path}\" ${quiet_params} ${parameters} /SkipRules=ServerCoreBlockUnsupportedSxSCheck",
-    unless  => "reg.exe query ${get_instancename_from_registry}",
-    require => Reboot["reboot before installing ${instance_name} (if pending)"],
-    returns => [0,3010],
+  if $user {
+    exec { "Install SQL Server instance: ${instance_name}":
+      command => "\"${installer_path}\" ${quiet_params} ${parameters} /SkipRules=ServerCoreBlockUnsupportedSxSCheck",
+      unless  => "reg.exe query ${get_instancename_from_registry}",
+      require => Reboot["reboot before installing ${instance_name} (if pending)"],
+      user    => $user,
+      returns => [0,3010],
+    }
   }
-
+  else
+  {
+    exec { "Install SQL Server instance: ${instance_name}":
+      command => "\"${installer_path}\" ${quiet_params} ${parameters} /SkipRules=ServerCoreBlockUnsupportedSxSCheck",
+      unless  => "reg.exe query ${get_instancename_from_registry}",
+      require => Reboot["reboot before installing ${instance_name} (if pending)"],
+      returns => [0,3010],
+    }
+  }
 }

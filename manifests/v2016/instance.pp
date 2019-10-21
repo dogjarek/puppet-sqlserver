@@ -6,7 +6,8 @@ define sqlserver::v2016::instance(
   $instance_name  = $title,
   $install_type   = 'SP1',
   $install_params = {},
-  $tcp_port       = 0
+  $tcp_port       = 0,
+  $user = undef,
   ) {
 
   require ::sqlserver::v2016::iso
@@ -16,9 +17,17 @@ define sqlserver::v2016::instance(
     timeout => 1800,
   }
 
-  sqlserver::common::install_sqlserver_instance { $instance_name:
-    installer_path => $::sqlserver::v2016::iso::installer,
-    install_params => $install_params,
+  if $user {
+    sqlserver::common::install_sqlserver_instance { $instance_name:
+      installer_path => $::sqlserver::v2016::iso::installer,
+      install_params => $install_params,
+      user = $user,
+    }
+  else {
+    sqlserver::common::install_sqlserver_instance { $instance_name:
+      installer_path => $::sqlserver::v2016::iso::installer,
+      install_params => $install_params,
+    }
   }
 
   # 'Patch' is equivalent to 'SP1' for backwards compatibility
