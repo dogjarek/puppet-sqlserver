@@ -21,8 +21,9 @@ define sqlserver::v2016::instance(
     sqlserver::common::install_sqlserver_instance { $instance_name:
       installer_path => $::sqlserver::v2016::iso::installer,
       install_params => $install_params,
-      user = $user,
+      user           => $user,
     }
+  }
   else {
     sqlserver::common::install_sqlserver_instance { $instance_name:
       installer_path => $::sqlserver::v2016::iso::installer,
